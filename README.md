@@ -1,10 +1,13 @@
 # flib
 
-A small C library for files and directories. It reads and prints file contents,
+A small C-lang library for files and directories. It reads and prints file contents,
 reports metadata (size, line count, language, permissions, timestamps), lists
 directories and copies them recursively.
 
 POSIX only, no dependencies.
+
+## documentation
+https://bulba2280.github.io/Flib/
 
 ## Build
 
