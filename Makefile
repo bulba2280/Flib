@@ -10,7 +10,7 @@ LIB_SO := $(BUILD)/libflib.so
 SRC    := $(wildcard src/*.c)
 OBJ    := $(patsubst src/%.c,$(BUILD)/%.o,$(SRC))
 
-.PHONY: all install uninstall clean
+.PHONY: all install uninstall clean docs
 
 all: $(LIB_A) $(LIB_SO)
 
@@ -36,6 +36,9 @@ uninstall:
 	rm -f $(DESTDIR)$(PREFIX)/include/flib.h
 	rm -f $(DESTDIR)$(PREFIX)/lib/libflib.a
 	rm -f $(DESTDIR)$(PREFIX)/lib/libflib.so
+
+docs:
+	python3 docs/build.py
 
 clean:
 	rm -rf $(BUILD)

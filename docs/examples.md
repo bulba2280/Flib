@@ -1,15 +1,15 @@
-# Примеры
+# Examples
 
-Короткие самостоятельные программы. Каждая это отдельный `main.c`, который
-подключает `flib.h` и собирается так:
+Short standalone programs. Each one is a separate `main.c` that includes
+`flib.h` and builds like this:
 
 ```sh
 cc -std=c11 -Iinclude main.c -Lbuild -lflib -o main
 ```
 
-## Бэкап конфига
+## Back up a config
 
-Перед перезаписью файла стоит сохранить копию:
+Before overwriting a file, keep a copy:
 
 ```c
 #include "flib.h"
@@ -18,16 +18,16 @@ cc -std=c11 -Iinclude main.c -Lbuild -lflib -o main
 int main(void)
 {
     if (copy_File("config.ini", "config.ini.bak") != 0) {
-        fprintf(stderr, "бэкап не вышел: %s\n", flib_LastError());
+        fprintf(stderr, "backup failed: %s\n", flib_LastError());
         return 1;
     }
     return 0;
 }
 ```
 
-## Мини-cat
+## Mini cat
 
-Показать файл, имя которого передали аргументом:
+Print the file passed as an argument:
 
 ```c
 #include "flib.h"
@@ -47,9 +47,9 @@ int main(int argc, char **argv)
 }
 ```
 
-## Достать порт из конфига
+## Read the port from a config
 
-Читаем файл целиком и ищем строку `port=`:
+Read the whole file and look for the `port=` line:
 
 ```c
 #include "flib.h"
@@ -67,14 +67,14 @@ int main(void)
     }
 
     char *line = strstr(cfg, "port=");
-    printf("порт: %d\n", line ? atoi(line + 5) : 8080);
+    printf("port: %d\n", line ? atoi(line + 5) : 8080);
 
     free(cfg);
     return 0;
 }
 ```
 
-## Найти все .log в каталоге
+## Find every .log file in a directory
 
 ```c
 #include "flib.h"
@@ -103,9 +103,9 @@ int main(void)
 }
 ```
 
-## Бэкап каталога с датой
+## Date-stamped directory backup
 
-Копируем `src` в каталог, названный сегодняшним числом:
+Copy `src` into a directory named after today's date:
 
 ```c
 #include "flib.h"
@@ -126,9 +126,9 @@ int main(void)
 }
 ```
 
-## Разложить отчёты по каталогам
+## Sort reports into directories
 
-Создаём структуру и кладём туда файл:
+Create the structure and put a file in it:
 
 ```c
 #include "flib.h"
@@ -145,9 +145,9 @@ int main(void)
 }
 ```
 
-## Список загрузок в лог
+## Write a directory listing to a log
 
-Получаем содержимое каталога одной строкой и дописываем в файл:
+Get the directory contents as one string and append it to a file:
 
 ```c
 #include "flib.h"
@@ -177,10 +177,10 @@ int main(void)
 }
 ```
 
-## Проверить файл перед чтением
+## Check a file before reading it
 
-Не стоит читать двоичные данные вслепую. Сначала спросим у `flib`, что это
-за файл:
+There is no point in reading binary data blindly. Ask `flib` what the file is
+first:
 
 ```c
 #include "flib.h"
@@ -200,7 +200,7 @@ int main(int argc, char **argv)
     }
 
     if (!fi.is_text) {
-        printf("%s: двоичные данные, %llu байт\n", fi.name, fi.size);
+        printf("%s: binary data, %llu bytes\n", fi.name, fi.size);
         info_File_Free(&fi);
         return 0;
     }

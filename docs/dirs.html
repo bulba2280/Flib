@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Working with directories - flib</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<nav><a href="index.html">Overview</a>
+<a href="files.html">Files</a>
+<span class="current">Directories</span>
+<a href="examples.html">Examples</a>
+<a href="changelog.html">Changelog</a>
+<a href="license.html">License</a></nav>
+<main>
+<h1>Working with directories</h1>
+<p>Everything works the same way as with files: <code>0</code> on success, <code>-1</code> on failure,
+<code>NULL</code> when nothing could be created.</p>
+<h2>read_Dir</h2>
+<pre><code class="language-c">int read_Dir(const char *path, DirList *list);
+void read_Dir_Free(DirList *list);
+</code></pre>
+<p>Reads a directory into a <code>DirList</code>: names, full paths, types, sizes. The <code>.</code>
+and <code>..</code> entries are skipped, everything else is sorted by name. Memory is
+released by <code>read_Dir_Free()</code>.</p>
+<pre><code class="language-c">DirList list;
+
+if (read_Dir(&quot;src&quot;, &amp;list) == 0) {
+    for (size_t i = 0; i &lt; list.count; i++)
+        printf(&quot;%s%s\n&quot;, list.items[i].name,
+               list.items[i].type == FT_DIRECTORY ? &quot;/&quot; : &quot;&quot;);
+    read_Dir_Free(&amp;list);
+}
+</code></pre>
+<p><code>DirList</code> has two fields: <code>items</code> (an array of <code>DirEntry</code>) and <code>count</code>.</p>
+<table>
+<thead>
+<tr>
+<th><code>DirEntry</code> field</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>name</code></td>
+<td>name inside the directory</td>
+</tr>
+<tr>
+<td><code>path</code></td>
+<td>full path, directory plus name</td>
+</tr>
+<tr>
+<td><code>type</code></td>
+<td><code>FT_REGULAR</code>, <code>FT_DIRECTORY</code>, <code>FT_SYMLINK</code>, <code>FT_FIFO</code> and the rest</td>
+</tr>
+<tr>
+<td><code>size</code></td>
+<td>size in bytes</td>
+</tr>
+</tbody>
+</table>
+<h2>read_DirText</h2>
+<pre><code class="language-c">char *read_DirText(const char *path);
+</code></pre>
+<p>Returns the whole directory as one string: one name per line, directories end
+with <code>/</code>. An empty directory gives <code>""</code>. The caller frees the memory.</p>
+<pre><code class="language-c">char *text = read_DirText(&quot;src&quot;);
+
+if (!text) {
+    fprintf(stderr, &quot;error: %s\n&quot;, flib_LastError());
+    return 1;
+}
+printf(&quot;%s&quot;, text);
+free(text);
+</code></pre>
+<h2>read_Dir_Print</h2>
+<pre><code class="language-c">void read_Dir_Print(const DirList *list, FILE *out);
+</code></pre>
+<p>Prints the list as "type, size, name". With <code>out == NULL</code> the output goes to
+<code>stdout</code>.</p>
+<h2>make_Dir</h2>
+<pre><code class="language-c">int make_Dir(const char *path);
+</code></pre>
+<p>Creates a directory together with all its parents, like <code>mkdir -p</code>. An existing
+directory is not an error.</p>
+<pre><code class="language-c">make_Dir(&quot;backup/2026/november&quot;);
+</code></pre>
+<h2>copy_File</h2>
+<pre><code class="language-c">int copy_File(const char *src, const char *dst);
+</code></pre>
+<p>Copies a regular file: contents, permissions, modification time. If <code>src</code> and
+<code>dst</code> point to the same file, it returns an error.</p>
+<pre><code class="language-c">if (copy_File(&quot;config.ini&quot;, &quot;config.ini.bak&quot;) != 0)
+    fprintf(stderr, &quot;%s\n&quot;, flib_LastError());
+</code></pre>
+<h2>copy_Dir</h2>
+<pre><code class="language-c">int copy_Dir(const char *src, const char *dst);
+</code></pre>
+<p>Recursively copies the contents of <code>src</code> into <code>dst</code>.</p>
+<ul>
+<li>If <code>dst</code> does not exist, it is created along with its parents, permissions
+  and times are copied.</li>
+<li>If <code>dst</code> exists, entries are copied inside it, and matching files are
+  overwritten.</li>
+<li>Regular files, subdirectories, symlinks and FIFOs are copied, a symlink stays
+  a link.</li>
+<li>Sockets and devices are skipped.</li>
+<li>Copying a directory into itself is an error.</li>
+</ul>
+<p>On failure it returns <code>-1</code>, and whatever was already copied stays in place.</p>
+<pre><code class="language-c">if (copy_Dir(&quot;project&quot;, &quot;backup/project&quot;) != 0)
+    fprintf(stderr, &quot;error: %s\n&quot;, flib_LastError());
+</code></pre>
+</main>
+<footer>flib 1.1.0</footer>
+</body>
+</html>

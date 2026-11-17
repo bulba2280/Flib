@@ -1,33 +1,33 @@
 # flib
 
-Маленькая библиотека на C для работы с файлами и каталогами. Читает и печатает
-файлы, собирает метаданные (размер, строки, язык, права, даты), выводит
-содержимое каталога и копирует его рекурсивно.
+A small C library for files and directories. It reads and prints file contents,
+reports metadata (size, line count, language, permissions, timestamps), lists
+directories and copies them recursively.
 
-Зависимостей нет, только POSIX и стандартная библиотека.
+POSIX only, no dependencies.
 
-## Сборка
+## Build
 
 ```sh
 make
 ```
 
-На выходе получатся `build/libflib.a` и `build/libflib.so`. Если нужна
-установка в систему:
+This produces `build/libflib.a` and `build/libflib.so`. To install into the
+system:
 
 ```sh
 sudo make install
 ```
 
-Заголовок попадёт в `/usr/local/include`, библиотеки в `/usr/local/lib`.
+The header goes to `/usr/local/include`, the libraries to `/usr/local/lib`.
 
-Можно и не устанавливать, а линковаться прямо из каталога сборки:
+You can also skip installation and link straight from the build directory:
 
 ```sh
 cc -std=c11 -Iinclude main.c -Lbuild -lflib -o main
 ```
 
-## Быстрый пример
+## Quick example
 
 ```c
 #include "flib.h"
@@ -41,25 +41,34 @@ int main(void) {
         return 1;
     }
 
-    printf("%s, %llu байт, язык: %s\n", fi.name, fi.size,
-           fi.language ? fi.language : "не определён");
+    printf("%s, %llu bytes, language: %s\n", fi.name, fi.size,
+           fi.language ? fi.language : "unknown");
     info_File_Free(&fi);
     return 0;
 }
 ```
 
-## Пара замечаний
+## A couple of notes
 
-Проверял только на Linux. Время создания берётся через `statx()`, если система и
-файловая система его отдают, иначе на месте времени создания будет `ctime`.
+Tested on Linux only. Creation time comes from `statx()` when the system and
+filesystem provide it, otherwise `ctime` is used in its place.
 
-## Документация
+## Documentation
 
-- [Файлы](docs/files.md): чтение, печать, `FileInfo`
-- [Каталоги](docs/dirs.md): листинг, создание, копирование
-- [Примеры](docs/examples.md): готовые куски кода
-- [История изменений](docs/changelog.md)
+- [Files](docs/files.md): reading, printing, `FileInfo`
+- [Directories](docs/dirs.md): listing, creating, copying
+- [Examples](docs/examples.md): ready to use snippets
+- [Changelog](docs/changelog.md)
 
-## Лицензия
+The same pages are available as static HTML, starting at
+[docs/index.html](docs/index.html). To rebuild them after editing the
+Markdown:
 
-MIT. Текст лежит в [LICENSE](LICENSE).
+```sh
+python3 -m pip install -r docs/requirements.txt
+make docs
+```
+
+## License
+
+MIT. See [LICENSE](LICENSE).

@@ -1,24 +1,24 @@
 # flib
 
-Маленькая библиотека на C для работы с файлами и каталогами: читает и печатает
-файлы, собирает метаданные, выводит содержимое каталога и копирует его
-рекурсивно. Зависимостей нет, только POSIX и стандартная библиотека.
+A small C library for files and directories: it reads and prints file contents,
+collects metadata, lists directories and copies them recursively. POSIX only,
+no dependencies.
 
-## Сборка
+## Build
 
 ```sh
 make
 sudo make install
 ```
 
-Заголовок ставится в `/usr/local/include`, библиотеки в `/usr/local/lib`. Без
-установки можно линковаться прямо из каталога сборки:
+The header goes to `/usr/local/include`, the libraries to `/usr/local/lib`.
+Without installation you can link straight from the build directory:
 
 ```sh
 cc -std=c11 -Iinclude main.c -Lbuild -lflib -o main
 ```
 
-## Быстрый пример
+## Quick example
 
 ```c
 #include "flib.h"
@@ -32,17 +32,17 @@ int main(void) {
         return 1;
     }
 
-    printf("%s, %llu байт, язык: %s\n", fi.name, fi.size,
-           fi.language ? fi.language : "не определён");
+    printf("%s, %llu bytes, language: %s\n", fi.name, fi.size,
+           fi.language ? fi.language : "unknown");
     info_File_Free(&fi);
     return 0;
 }
 ```
 
-## Разделы
+## Sections
 
-- [Работа с файлами](files.md): чтение, печать, `FileInfo`
-- [Работа с каталогами](dirs.md): листинг, создание, копирование
-- [Примеры](examples.md): готовые куски кода
-- [История изменений](changelog.md)
-- [Лицензия](license.md)
+- [Working with files](files.md): reading, printing, `FileInfo`
+- [Working with directories](dirs.md): listing, creating, copying
+- [Examples](examples.md): ready to use snippets
+- [Changelog](changelog.md)
+- [License](license.md)

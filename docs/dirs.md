@@ -1,7 +1,7 @@
-# Работа с каталогами
+# Working with directories
 
-Здесь всё так же, как с файлами: `0` при успехе, `-1` при ошибке, `NULL`,
-если создать ничего не удалось.
+Everything works the same way as with files: `0` on success, `-1` on failure,
+`NULL` when nothing could be created.
 
 ## read_Dir
 
@@ -10,9 +10,9 @@ int read_Dir(const char *path, DirList *list);
 void read_Dir_Free(DirList *list);
 ```
 
-Читает каталог в `DirList`: имена, полные пути, типы, размеры. Точки `.` и
-`..` пропускаются, остальное сортируется по имени. Память освобождает
-`read_Dir_Free()`.
+Reads a directory into a `DirList`: names, full paths, types, sizes. The `.`
+and `..` entries are skipped, everything else is sorted by name. Memory is
+released by `read_Dir_Free()`.
 
 ```c
 DirList list;
@@ -25,14 +25,14 @@ if (read_Dir("src", &list) == 0) {
 }
 ```
 
-В `DirList` два поля: `items` (массив `DirEntry`) и `count`.
+`DirList` has two fields: `items` (an array of `DirEntry`) and `count`.
 
-| Поле `DirEntry` | Значение |
+| `DirEntry` field | Meaning |
 | --- | --- |
-| `name` | имя внутри каталога |
-| `path` | полный путь, каталог плюс имя |
-| `type` | `FT_REGULAR`, `FT_DIRECTORY`, `FT_SYMLINK`, `FT_FIFO` и остальные |
-| `size` | размер в байтах |
+| `name` | name inside the directory |
+| `path` | full path, directory plus name |
+| `type` | `FT_REGULAR`, `FT_DIRECTORY`, `FT_SYMLINK`, `FT_FIFO` and the rest |
+| `size` | size in bytes |
 
 ## read_DirText
 
@@ -40,14 +40,14 @@ if (read_Dir("src", &list) == 0) {
 char *read_DirText(const char *path);
 ```
 
-Отдаёт всё содержимое каталога одной строкой: по имени на строку, у каталогов
-на конце `/`. Пустой каталог даёт `""`. Память освобождает вызывающий.
+Returns the whole directory as one string: one name per line, directories end
+with `/`. An empty directory gives `""`. The caller frees the memory.
 
 ```c
 char *text = read_DirText("src");
 
 if (!text) {
-    fprintf(stderr, "ошибка: %s\n", flib_LastError());
+    fprintf(stderr, "error: %s\n", flib_LastError());
     return 1;
 }
 printf("%s", text);
@@ -60,7 +60,7 @@ free(text);
 void read_Dir_Print(const DirList *list, FILE *out);
 ```
 
-Печатает список в формате «тип, размер, имя». При `out == NULL` вывод идёт в
+Prints the list as "type, size, name". With `out == NULL` the output goes to
 `stdout`.
 
 ## make_Dir
@@ -69,8 +69,8 @@ void read_Dir_Print(const DirList *list, FILE *out);
 int make_Dir(const char *path);
 ```
 
-Создаёт каталог вместе со всеми родителями, как `mkdir -p`. Если каталог уже
-есть, это не ошибка.
+Creates a directory together with all its parents, like `mkdir -p`. An existing
+directory is not an error.
 
 ```c
 make_Dir("backup/2026/november");
@@ -82,8 +82,8 @@ make_Dir("backup/2026/november");
 int copy_File(const char *src, const char *dst);
 ```
 
-Копирует обычный файл: содержимое, права, время изменения. Если `src` и `dst`
-указывают на один и тот же файл, вернёт ошибку.
+Copies a regular file: contents, permissions, modification time. If `src` and
+`dst` point to the same file, it returns an error.
 
 ```c
 if (copy_File("config.ini", "config.ini.bak") != 0)
@@ -96,18 +96,20 @@ if (copy_File("config.ini", "config.ini.bak") != 0)
 int copy_Dir(const char *src, const char *dst);
 ```
 
-Рекурсивно копирует содержимое `src` в `dst`.
+Recursively copies the contents of `src` into `dst`.
 
-- Если `dst` нет, он создаётся вместе с родителями, права и время переносятся.
-- Если `dst` есть, файлы копируются внутрь, совпадающие перезаписываются.
-- Обычные файлы, подкаталоги, симлинки и FIFO копируются, симлинк остаётся
-  ссылкой.
-- Сокеты и устройства пропускаются.
-- Копирование каталога внутрь самого себя считается ошибкой.
+- If `dst` does not exist, it is created along with its parents, permissions
+  and times are copied.
+- If `dst` exists, entries are copied inside it, and matching files are
+  overwritten.
+- Regular files, subdirectories, symlinks and FIFOs are copied, a symlink stays
+  a link.
+- Sockets and devices are skipped.
+- Copying a directory into itself is an error.
 
-При ошибке вернётся `-1`, уже скопированная часть останется на месте.
+On failure it returns `-1`, and whatever was already copied stays in place.
 
 ```c
 if (copy_Dir("project", "backup/project") != 0)
-    fprintf(stderr, "ошибка: %s\n", flib_LastError());
+    fprintf(stderr, "error: %s\n", flib_LastError());
 ```

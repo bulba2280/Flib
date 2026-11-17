@@ -1,10 +1,10 @@
-# Работа с файлами
+# Working with files
 
-Правила одинаковые почти для всех функций:
+The rules are the same for almost every function:
 
-- что-то делает: вернула `0`, значит получилось, `-1` значит нет;
-- что-то создаёт: вернула указатель, а при ошибке `NULL`;
-- причину ошибки всегда можно прочитать через `flib_LastError()`.
+- it does something: `0` means success, `-1` means failure;
+- it creates something: it returns a pointer, or `NULL` on error;
+- the reason is always available from `flib_LastError()`.
 
 ## print_File
 
@@ -12,8 +12,8 @@
 int print_File(const char *path);
 ```
 
-Печатает файл в `stdout`, по сути `cat` внутри программы. Данные идут кусками
-по 64 КиБ, поэтому память не зависит от размера файла.
+Prints a file to `stdout`, basically `cat` inside your program. Data goes in
+64 KiB chunks, so memory use does not depend on the file size.
 
 ```c
 if (print_File("hello.txt") != 0)
@@ -27,22 +27,22 @@ char *read_File(const char *path);
 char *read_FileEx(const char *path, size_t *out_size);
 ```
 
-`read_File()` читает файл целиком и возвращает строку с `'\0'` в конце.
-Память выделяется через `malloc`, освобождать её вызывающему.
+`read_File()` reads the whole file and returns a NUL-terminated string. The
+memory comes from `malloc`, so the caller frees it.
 
-`read_FileEx()` делает то же самое, но ещё записывает размер в `*out_size`
-(терминирующий ноль не считается). Если не вышло, вернётся `NULL`, а
-`*out_size` станет `0`.
+`read_FileEx()` does the same, but also stores the size in `*out_size` (the
+terminator is not counted). On failure it returns `NULL` and sets `*out_size`
+to `0`.
 
 ```c
 size_t len;
 char *text = read_FileEx("main.c", &len);
 
 if (!text) {
-    fprintf(stderr, "ошибка: %s\n", flib_LastError());
+    fprintf(stderr, "error: %s\n", flib_LastError());
     return 1;
 }
-printf("прочитано %zu байт\n", len);
+printf("read %zu bytes\n", len);
 free(text);
 ```
 
@@ -53,40 +53,40 @@ int info_File(const char *path, FileInfo *info);
 void info_File_Free(FileInfo *info);
 ```
 
-Собирает в структуру всё, что можно узнать о файле: размер, число строк, язык,
-права, даты, тип.
+Collects everything it can find out about a file into the struct: size, line
+count, language, permissions, timestamps, type.
 
 ```c
 FileInfo fi;
 
 if (info_File("photo.png", &fi) == 0) {
-    printf("размер: %llu байт\n", fi.size);
-    printf("язык:   %s\n", fi.language ? fi.language : "не определён");
+    printf("size: %llu bytes\n", fi.size);
+    printf("language: %s\n", fi.language ? fi.language : "unknown");
     info_File_Free(&fi);
 }
 ```
 
-`info_File_Free()` освобождает строки внутри структуры и обнуляет её. Вызывать
-после каждого успешного `info_File()`.
+`info_File_Free()` releases the strings inside the struct and zeroes it. Call it
+after every successful `info_File()`.
 
-Строки считаются по всему файлу, поэтому на большом логе `info_File()` будет
-думать ровно столько, сколько нужно, чтобы его прочитать. У FIFO, сокетов и
-устройств содержимое не читается: заполняются только метаданные.
+Line counting reads the whole file, so on a large log `info_File()` takes as
+long as reading it. FIFOs, sockets and devices are not read at all: only
+metadata is filled in.
 
-Что лежит в `FileInfo`:
+What `FileInfo` contains:
 
-| Поле | Значение |
+| Field | Meaning |
 | --- | --- |
-| `path`, `name`, `extension` | путь, имя, расширение без точки |
-| `language` | язык или формат: по расширению, имени или shebang |
+| `path`, `name`, `extension` | path, name, extension without the dot |
+| `language` | language or format from the extension, file name or shebang |
 | `type` | `FT_REGULAR`, `FT_DIRECTORY`, `FT_SYMLINK`, `FT_FIFO`, `FT_SOCKET`, `FT_BLOCK_DEVICE`, `FT_CHAR_DEVICE` |
-| `is_text` | эвристика «текст или двоичные данные» |
-| `is_empty` | размер 0 байт |
-| `size` | размер в байтах |
-| `lines` | число строк, только для текста |
-| `mode`, `perms` | права числом (`0644`) и строкой (`-rw-r--r--`) |
-| `uid`, `gid`, `inode`, `links` | владелец, группа, inode, число жёстких ссылок |
-| `created`, `created_is_birth` | время создания (btime), либо `ctime`, если ФС не хранит btime |
+| `is_text` | "text or binary data" heuristic |
+| `is_empty` | size is 0 bytes |
+| `size` | size in bytes |
+| `lines` | line count, text files only |
+| `mode`, `perms` | permissions as a number (`0644`) and as a string (`-rw-r--r--`) |
+| `uid`, `gid`, `inode`, `links` | owner, group, inode, hard link count |
+| `created`, `created_is_birth` | creation time (btime), or `ctime` when the filesystem has no btime |
 | `modified`, `accessed`, `changed` | mtime, atime, ctime |
 
 ## info_File_Print
@@ -95,8 +95,8 @@ if (info_File("photo.png", &fi) == 0) {
 void info_File_Print(const FileInfo *info, FILE *out);
 ```
 
-Печатает структуру в `out`. Если передать `NULL`, вывод пойдёт в `stdout`.
-Удобно в консольных утилитах и при отладке.
+Prints the struct to `out`. Pass `NULL` to write to `stdout`. Handy in console
+tools and while debugging.
 
 ```c
 FileInfo fi;
@@ -107,7 +107,7 @@ if (info_File("notes.txt", &fi) == 0) {
 }
 ```
 
-Выглядит примерно так:
+The output looks roughly like this:
 
 ```
 Path:        examples/demo.c
@@ -127,7 +127,7 @@ Accessed:    2026-11-14 16:23:13
 Metadata:    2026-11-14 16:23:13
 ```
 
-## Служебные функции
+## Helper functions
 
 ```c
 int file_Exists(const char *path);
@@ -137,25 +137,25 @@ const char *time_Format(time_t t, char *buf, size_t bufsize);
 const char *flib_LastError(void);
 ```
 
-`file_Exists()` возвращает `1`, если путь есть, иначе `0`.
+`file_Exists()` returns `1` if the path exists, `0` otherwise.
 
-`file_Language()` определяет язык по расширению, имени файла или shebang.
-Возвращает `NULL`, если ничего не подошло. Строка статическая, `free()` не
-нужен.
+`file_Language()` detects the language from the extension, file name or
+shebang. It returns `NULL` when nothing matches. The string is static, no
+`free()` needed.
 
-`file_Type_Name()` даёт человекочитаемое имя типа: `regular file`, `directory` и
-так далее.
+`file_Type_Name()` gives a readable type name: `regular file`, `directory` and
+so on.
 
-`time_Format()` пишет время в `buf` в виде `ГГГГ-ММ-ДД ЧЧ:ММ:СС` и возвращает
-сам `buf`.
+`time_Format()` writes the time into `buf` as `YYYY-MM-DD HH:MM:SS` and returns
+`buf`.
 
 ```c
 char when[32];
-printf("изменён: %s\n", time_Format(fi.modified, when, sizeof when));
+printf("modified: %s\n", time_Format(fi.modified, when, sizeof when));
 ```
 
-`flib_LastError()` отдаёт текст последней ошибки. Буфер свой у каждого потока
-(`_Thread_local`), текст в UTF-8.
+`flib_LastError()` returns the text of the last error. The buffer is per thread
+(`_Thread_local`), the text is UTF-8.
 
-Функции, которые ничего не создают, ошибку не выставляют. Так что смотреть на
-`flib_LastError()` имеет смысл только после `-1` или `NULL`.
+Functions that create nothing do not set an error. So checking
+`flib_LastError()` only makes sense after `-1` or `NULL`.

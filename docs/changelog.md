@@ -1,17 +1,17 @@
-# История изменений
+# Changelog
 
 ## 1.1.0 (2026-11-14)
 
-Добавлено:
+Added:
 
-- работа с каталогами: `read_Dir()`, `read_DirText()`, `read_Dir_Print()`,
+- directory support: `read_Dir()`, `read_DirText()`, `read_Dir_Print()`,
   `read_Dir_Free()`, `make_Dir()`, `copy_File()`, `copy_Dir()`;
-- вывод библиотеки на английском: ошибки, названия типов и формат
-  `info_File_Print()`;
-- документация в Markdown.
+- English output from the library: error messages, type names and the
+  `info_File_Print()` format;
+- English documentation with a static HTML build.
 
 ## 1.0.0 (2026-11-14)
 
-Первая версия: `print_File()`, `read_File()`, `read_FileEx()`, `info_File()`,
-`info_File_Print()`, `info_File_Free()`. Плюс служебные `file_Exists()`,
-`file_Language()`, `file_Type_Name()`, `time_Format()` и `flib_LastError()`.
+First release: `print_File()`, `read_File()`, `read_FileEx()`, `info_File()`,
+`info_File_Print()`, `info_File_Free()`. Plus the helpers `file_Exists()`,
+`file_Language()`, `file_Type_Name()`, `time_Format()` and `flib_LastError()`.
