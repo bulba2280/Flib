@@ -113,3 +113,96 @@ On failure it returns `-1`, and whatever was already copied stays in place.
 if (copy_Dir("project", "backup/project") != 0)
     fprintf(stderr, "error: %s\n", flib_LastError());
 ```
+
+## remove_Dir
+
+```c
+int remove_Dir(const char *path);
+```
+
+Removes a directory with everything inside, like `rm -rf`. Symlinks are removed
+as links, their targets are not touched. The function refuses `""`, `"."`,
+`".."` and the filesystem root.
+
+On failure it stops at the first error and returns `-1`. What was already removed
+stays removed, this cannot be undone. A tree deeper than 1024 levels stops with
+an error instead of overflowing the stack.
+
+```c
+if (remove_Dir("build") != 0)
+    fprintf(stderr, "%s\n", flib_LastError());
+```
+
+## move_Dir
+
+```c
+int move_Dir(const char *src, const char *dst);
+```
+
+Moves a directory. It uses `rename()` first, so on the same filesystem the
+operation is atomic. When the filesystem returns `EXDEV`, it copies the tree and
+removes the source. The second case is not atomic: if it fails, a partial copy
+may stay in place. Trees with sockets or devices are refused in that case,
+because `copy_Dir()` skips them and removing the source would lose them.
+
+`dst` is the new path, not a directory to move into. If `dst` already exists,
+`rename()` replaces it when the rules of the system allow that, and the
+cross-device fallback merges the contents with `copy_Dir()`.
+
+## walk_Dir
+
+```c
+#define FLIB_WALK_FOLLOW (1u << 0)
+#define FLIB_WALK_HIDDEN (1u << 1)
+
+typedef int (*flib_WalkFn)(const char *path, FileType type,
+                           unsigned long long size, int depth, void *user);
+
+int walk_Dir(const char *path, unsigned flags, flib_WalkFn fn, void *user);
+```
+
+Walks a directory tree without building a `DirList` in memory. The callback runs
+for every entry inside `path`, the path itself is not passed. `depth` is `0` for
+direct children and grows by one for each level. Entries inside a directory are
+visited in name order.
+
+By default hidden names are skipped and symlinks are not followed. Two flags
+change that:
+
+- `FLIB_WALK_HIDDEN` includes names starting with a dot;
+- `FLIB_WALK_FOLLOW` follows symlinks to directories. The walk remembers the
+  current chain of directories, so a link back to a parent is not entered again.
+
+The callback returns `0` to continue. Any other value stops the walk and becomes
+the return value of `walk_Dir()`. On an internal error the function returns `-1`
+and sets `flib_LastError()`. A tree deeper than 1024 levels stops with an error
+instead of overflowing the stack.
+
+```c
+#include "flib.h"
+#include <stdio.h>
+
+static int count_entry(const char *path, FileType type,
+                       unsigned long long size, int depth, void *user)
+{
+    unsigned long long *total = user;
+
+    (void)path;
+    (void)depth;
+    if (type == FT_REGULAR)
+        *total += size;
+    return 0;
+}
+
+int main(void)
+{
+    unsigned long long total = 0;
+
+    if (walk_Dir("src", 0, count_entry, &total) != 0) {
+        fprintf(stderr, "%s\n", flib_LastError());
+        return 1;
+    }
+    printf("%llu bytes\n", total);
+    return 0;
+}
+```

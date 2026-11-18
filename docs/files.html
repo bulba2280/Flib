@@ -48,6 +48,38 @@ if (!text) {
 printf(&quot;read %zu bytes\n&quot;, len);
 free(text);
 </code></pre>
+<h2>write_File and append_File</h2>
+<pre><code class="language-c">int write_File(const char *path, const void *data, size_t size);
+int append_File(const char *path, const void *data, size_t size);
+</code></pre>
+<p><code>write_File()</code> truncates the file and writes exactly <code>size</code> bytes. <code>append_File()</code>
+writes at the end and creates the file when it does not exist. Both work with
+binary data and never add a NUL terminator.</p>
+<pre><code class="language-c">if (write_File(&quot;notes.txt&quot;, &quot;hello\n&quot;, 6) != 0)
+    fprintf(stderr, &quot;%s\n&quot;, flib_LastError());
+
+if (append_File(&quot;notes.txt&quot;, &quot;world\n&quot;, 6) != 0)
+    fprintf(stderr, &quot;%s\n&quot;, flib_LastError());
+</code></pre>
+<p>On failure the function returns <code>-1</code>. <code>write_File()</code> is not atomic: if the disk
+fills up, part of the file may already be written.</p>
+<h2>move_File</h2>
+<pre><code class="language-c">int move_File(const char *src, const char *dst);
+</code></pre>
+<p>Moves a regular file. It uses <code>rename()</code> first, so on the same filesystem the
+operation is atomic. When the filesystem returns <code>EXDEV</code>, it copies the file and
+removes the source.</p>
+<p><code>dst</code> is the new path, not a directory to move into. Moving a symlink or a
+directory returns an error. If <code>dst</code> already exists, <code>rename()</code> replaces it when
+the rules of the system allow that.</p>
+<h2>remove_File</h2>
+<pre><code class="language-c">int remove_File(const char *path);
+</code></pre>
+<p>Removes a file, symlink or FIFO. A directory returns an error, use
+<code>remove_Dir()</code> for that.</p>
+<pre><code class="language-c">if (remove_File(&quot;old.log&quot;) != 0)
+    fprintf(stderr, &quot;%s\n&quot;, flib_LastError());
+</code></pre>
 <h2>info_File</h2>
 <pre><code class="language-c">int info_File(const char *path, FileInfo *info);
 void info_File_Free(FileInfo *info);
@@ -171,9 +203,9 @@ printf(&quot;modified: %s\n&quot;, time_Format(fi.modified, when, sizeof when));
 </code></pre>
 <p><code>flib_LastError()</code> returns the text of the last error. The buffer is per thread
 (<code>_Thread_local</code>), the text is UTF-8.</p>
-<p>Functions that create nothing do not set an error. So checking
-<code>flib_LastError()</code> only makes sense after <code>-1</code> or <code>NULL</code>.</p>
+<p>Not every function sets an error. Checking <code>flib_LastError()</code> only makes sense
+after a function returned <code>-1</code> or <code>NULL</code> because it failed.</p>
 </main>
-<footer>flib 1.1.0</footer>
+<footer>flib 1.2.0</footer>
 </body>
 </html>

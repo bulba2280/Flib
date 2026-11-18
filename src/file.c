@@ -104,3 +104,57 @@ int print_File(const char *path) {
   fclose(f);
   return rc;
 }
+
+static int write_all(FILE *f, const void *data, size_t size,
+                     const char *path) {
+  const unsigned char *p = data;
+  size_t done = 0;
+
+  while (done < size) {
+    size_t n = fwrite(p + done, 1, size - done, f);
+
+    if (n == 0) {
+      flib_set_error("writing '%s' failed: %s", path, strerror(errno));
+      return -1;
+    }
+    done += n;
+  }
+  return 0;
+}
+
+static int write_file_mode(const char *path, const void *data, size_t size,
+                           const char *mode, const char *action) {
+  FILE *f;
+  int rc = 0;
+
+  if (!flib_require_path(path, "file"))
+    return -1;
+  if (!data && size > 0) {
+    flib_set_error("null data for '%s'", path);
+    return -1;
+  }
+
+  f = fopen(path, mode);
+  if (!f) {
+    flib_set_error("cannot open '%s' for %s: %s", path, action,
+                   strerror(errno));
+    return -1;
+  }
+
+  if (write_all(f, data, size, path) != 0)
+    rc = -1;
+
+  if (fclose(f) != 0 && rc == 0) {
+    flib_set_error("writing '%s' failed: %s", path, strerror(errno));
+    rc = -1;
+  }
+  return rc;
+}
+
+int write_File(const char *path, const void *data, size_t size) {
+  return write_file_mode(path, data, size, "wb", "writing");
+}
+
+int append_File(const char *path, const void *data, size_t size) {
+  return write_file_mode(path, data, size, "ab", "appending");
+}

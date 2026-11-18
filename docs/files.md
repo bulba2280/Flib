@@ -46,6 +46,56 @@ printf("read %zu bytes\n", len);
 free(text);
 ```
 
+## write_File and append_File
+
+```c
+int write_File(const char *path, const void *data, size_t size);
+int append_File(const char *path, const void *data, size_t size);
+```
+
+`write_File()` truncates the file and writes exactly `size` bytes. `append_File()`
+writes at the end and creates the file when it does not exist. Both work with
+binary data and never add a NUL terminator.
+
+```c
+if (write_File("notes.txt", "hello\n", 6) != 0)
+    fprintf(stderr, "%s\n", flib_LastError());
+
+if (append_File("notes.txt", "world\n", 6) != 0)
+    fprintf(stderr, "%s\n", flib_LastError());
+```
+
+On failure the function returns `-1`. `write_File()` is not atomic: if the disk
+fills up, part of the file may already be written.
+
+## move_File
+
+```c
+int move_File(const char *src, const char *dst);
+```
+
+Moves a regular file. It uses `rename()` first, so on the same filesystem the
+operation is atomic. When the filesystem returns `EXDEV`, it copies the file and
+removes the source.
+
+`dst` is the new path, not a directory to move into. Moving a symlink or a
+directory returns an error. If `dst` already exists, `rename()` replaces it when
+the rules of the system allow that.
+
+## remove_File
+
+```c
+int remove_File(const char *path);
+```
+
+Removes a file, symlink or FIFO. A directory returns an error, use
+`remove_Dir()` for that.
+
+```c
+if (remove_File("old.log") != 0)
+    fprintf(stderr, "%s\n", flib_LastError());
+```
+
 ## info_File
 
 ```c
@@ -157,5 +207,5 @@ printf("modified: %s\n", time_Format(fi.modified, when, sizeof when));
 `flib_LastError()` returns the text of the last error. The buffer is per thread
 (`_Thread_local`), the text is UTF-8.
 
-Functions that create nothing do not set an error. So checking
-`flib_LastError()` only makes sense after `-1` or `NULL`.
+Not every function sets an error. Checking `flib_LastError()` only makes sense
+after a function returned `-1` or `NULL` because it failed.

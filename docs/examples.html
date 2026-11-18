@@ -162,6 +162,35 @@ int main(void)
     return 0;
 }
 </code></pre>
+<h2>Walk a tree and total file sizes</h2>
+<p><code>walk_Dir()</code> visits every entry without building a list:</p>
+<pre><code class="language-c">#include &quot;flib.h&quot;
+#include &lt;stdio.h&gt;
+
+static int add_size(const char *path, FileType type,
+                    unsigned long long size, int depth, void *user)
+{
+    unsigned long long *total = user;
+
+    (void)path;
+    (void)depth;
+    if (type == FT_REGULAR)
+        *total += size;
+    return 0;
+}
+
+int main(void)
+{
+    unsigned long long total = 0;
+
+    if (walk_Dir(&quot;src&quot;, 0, add_size, &amp;total) != 0) {
+        fprintf(stderr, &quot;%s\n&quot;, flib_LastError());
+        return 1;
+    }
+    printf(&quot;%llu bytes\n&quot;, total);
+    return 0;
+}
+</code></pre>
 <h2>Check a file before reading it</h2>
 <p>There is no point in reading binary data blindly. Ask <code>flib</code> what the file is
 first:</p>
@@ -198,6 +227,6 @@ int main(int argc, char **argv)
 }
 </code></pre>
 </main>
-<footer>flib 1.1.0</footer>
+<footer>flib 1.2.0</footer>
 </body>
 </html>

@@ -177,6 +177,39 @@ int main(void)
 }
 ```
 
+## Walk a tree and total file sizes
+
+`walk_Dir()` visits every entry without building a list:
+
+```c
+#include "flib.h"
+#include <stdio.h>
+
+static int add_size(const char *path, FileType type,
+                    unsigned long long size, int depth, void *user)
+{
+    unsigned long long *total = user;
+
+    (void)path;
+    (void)depth;
+    if (type == FT_REGULAR)
+        *total += size;
+    return 0;
+}
+
+int main(void)
+{
+    unsigned long long total = 0;
+
+    if (walk_Dir("src", 0, add_size, &total) != 0) {
+        fprintf(stderr, "%s\n", flib_LastError());
+        return 1;
+    }
+    printf("%llu bytes\n", total);
+    return 0;
+}
+```
+
 ## Check a file before reading it
 
 There is no point in reading binary data blindly. Ask `flib` what the file is

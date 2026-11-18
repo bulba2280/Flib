@@ -30,7 +30,7 @@ TEMPLATE = """<!doctype html>
 <main>
 {body}
 </main>
-<footer>flib 1.1.0</footer>
+<footer>flib 1.2.0</footer>
 </body>
 </html>
 """

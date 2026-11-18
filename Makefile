@@ -7,10 +7,11 @@ PREFIX  ?= /usr/local
 BUILD  := build
 LIB_A  := $(BUILD)/libflib.a
 LIB_SO := $(BUILD)/libflib.so
+TEST   := $(BUILD)/test_flib
 SRC    := $(wildcard src/*.c)
 OBJ    := $(patsubst src/%.c,$(BUILD)/%.o,$(SRC))
 
-.PHONY: all install uninstall clean docs
+.PHONY: all install uninstall clean docs test
 
 all: $(LIB_A) $(LIB_SO)
 
@@ -39,6 +40,12 @@ uninstall:
 
 docs:
 	python3 docs/build.py
+
+test: $(TEST)
+	./$(TEST)
+
+$(TEST): tests/test_flib.c $(LIB_A) include/flib.h
+	$(CC) $(CFLAGS) $< $(LIB_A) -o $@
 
 clean:
 	rm -rf $(BUILD)
