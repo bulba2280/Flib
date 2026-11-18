@@ -7,11 +7,7 @@ Added:
 - `write_File()` and `append_File()` for writing binary data;
 - `remove_File()` and recursive `remove_Dir()`;
 - `move_File()` and `move_Dir()`, with a copy and remove fallback across
-  filesystems;
-- `walk_Dir()` with the `FLIB_WALK_FOLLOW` and `FLIB_WALK_HIDDEN` flags;
-- version macros `FLIB_VERSION_MAJOR`, `FLIB_VERSION_MINOR` and
-  `FLIB_VERSION_PATCH`;
-- a test suite and the `make test` target.
+  filesystems.
 
 ## 1.1.0 (2026-11-14)
 

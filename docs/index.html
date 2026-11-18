@@ -16,8 +16,8 @@
 <main>
 <h1>flib</h1>
 <p>A small C library for files and directories: it reads and prints file contents,
-collects metadata, writes, moves and removes files, lists directories, copies
-them recursively and walks directory trees. POSIX only, no dependencies.</p>
+collects metadata, writes, moves and removes files, lists directories and copies
+them recursively. POSIX only, no dependencies.</p>
 <h2>Build</h2>
 <pre><code class="language-sh">make
 sudo make install
@@ -26,7 +26,6 @@ sudo make install
 Without installation you can link straight from the build directory:</p>
 <pre><code class="language-sh">cc -std=c11 -Iinclude main.c -Lbuild -lflib -o main
 </code></pre>
-<p>The test suite runs with <code>make test</code>.</p>
 <h2>Quick example</h2>
 <pre><code class="language-c">#include &quot;flib.h&quot;
 #include &lt;stdio.h&gt;
@@ -48,7 +47,7 @@ int main(void) {
 <h2>Sections</h2>
 <ul>
 <li><a href="files.html">Working with files</a>: reading, writing, <code>FileInfo</code>, moving and removing</li>
-<li><a href="dirs.html">Working with directories</a>: listing, creating, copying, walking and removing</li>
+<li><a href="dirs.html">Working with directories</a>: listing, creating, copying and removing</li>
 <li><a href="examples.html">Examples</a>: ready to use snippets</li>
 <li><a href="changelog.html">Changelog</a></li>
 <li><a href="license.html">License</a></li>

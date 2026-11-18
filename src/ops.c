@@ -25,19 +25,41 @@ static int path_is_root(const char *path) {
   return root;
 }
 
-// Reject entries that copy_Dir() does not copy.
-static int check_move_entry(const char *path, FileType type,
-                            unsigned long long size, int depth, void *user) {
-  (void)size;
-  (void)depth;
+// copy_Dir() does not copy sockets or devices, so removing the source after a
+// partial copy would lose them. Report whether such entries exist.
+static int tree_has_unsupported(const char *path) {
+  DIR *d;
+  struct dirent *de;
+  int found = 0;
 
-  if (type == FT_REGULAR || type == FT_DIRECTORY || type == FT_SYMLINK ||
-      type == FT_FIFO)
+  d = opendir(path);
+  if (!d)
     return 0;
 
-  flib_set_error("cannot move '%s' across filesystems: '%s' is a %s",
-                 (const char *)user, path, file_Type_Name(type));
-  return -1;
+  while (!found && (de = readdir(d)) != NULL) {
+    char *child;
+    struct stat st;
+
+    if (flib_is_dot_entry(de->d_name))
+      continue;
+
+    child = flib_join_path(path, de->d_name);
+    if (!child)
+      continue;
+
+    if (lstat(child, &st) == 0) {
+      if (S_ISDIR(st.st_mode))
+        found = tree_has_unsupported(child);
+      else if (!S_ISREG(st.st_mode) && !S_ISLNK(st.st_mode) &&
+               !S_ISFIFO(st.st_mode))
+        found = 1;
+    }
+
+    free(child);
+  }
+
+  closedir(d);
+  return found;
 }
 
 int remove_File(const char *path) {
@@ -224,8 +246,11 @@ int move_Dir(const char *src, const char *dst) {
 
   // copy_Dir() skips sockets and devices, so removing the source after a
   // partial copy would lose them. Refuse the move instead.
-  if (walk_Dir(src, FLIB_WALK_HIDDEN, check_move_entry, (void *)src) != 0)
+  if (tree_has_unsupported(src)) {
+    flib_set_error("cannot move '%s' across filesystems: it contains "
+                   "sockets or devices", src);
     return -1;
+  }
 
   if (copy_Dir(src, dst) != 0)
     return -1;

@@ -2,8 +2,7 @@
 
 A small C-lang library for files and directories. It reads and prints file contents,
 reports metadata (size, line count, language, permissions, timestamps), writes,
-moves and removes files, lists directories, copies them recursively and walks
-directory trees.
+moves and removes files, lists directories and copies them recursively.
 
 POSIX only, no dependencies.
 
@@ -28,12 +27,6 @@ You can also skip installation and link straight from the build directory:
 
 ```sh
 cc -std=c11 -Iinclude main.c -Lbuild -lflib -o main
-```
-
-To run the test suite:
-
-```sh
-make test
 ```
 
 ## Quick example
@@ -65,7 +58,7 @@ filesystem provide it, otherwise `ctime` is used in its place.
 ## Documentation
 
 - [Files](docs/files.md): reading, writing, `FileInfo`, moving and removing
-- [Directories](docs/dirs.md): listing, creating, copying, walking and removing
+- [Directories](docs/dirs.md): listing, creating, copying and removing
 - [Examples](docs/examples.md): ready to use snippets
 - [Changelog](docs/changelog.md)
 

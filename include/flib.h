@@ -2,9 +2,6 @@
 #define FLIB_H
 
 #define FLIB_VERSION "1.2.0"
-#define FLIB_VERSION_MAJOR 1
-#define FLIB_VERSION_MINOR 2
-#define FLIB_VERSION_PATCH 0
 
 #include <stddef.h>
 #include <stdio.h>
@@ -101,14 +98,6 @@ int remove_Dir(const char *path);
 int move_File(const char *src, const char *dst);
 
 int move_Dir(const char *src, const char *dst);
-
-#define FLIB_WALK_FOLLOW (1u << 0)
-#define FLIB_WALK_HIDDEN (1u << 1)
-
-typedef int (*flib_WalkFn)(const char *path, FileType type,
-                           unsigned long long size, int depth, void *user);
-
-int walk_Dir(const char *path, unsigned flags, flib_WalkFn fn, void *user);
 
 int file_Exists(const char *path);
 

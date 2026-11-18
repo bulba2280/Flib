@@ -1,8 +1,8 @@
 # flib
 
 A small C library for files and directories: it reads and prints file contents,
-collects metadata, writes, moves and removes files, lists directories, copies
-them recursively and walks directory trees. POSIX only, no dependencies.
+collects metadata, writes, moves and removes files, lists directories and copies
+them recursively. POSIX only, no dependencies.
 
 ## Build
 
@@ -17,8 +17,6 @@ Without installation you can link straight from the build directory:
 ```sh
 cc -std=c11 -Iinclude main.c -Lbuild -lflib -o main
 ```
-
-The test suite runs with `make test`.
 
 ## Quick example
 
@@ -44,7 +42,7 @@ int main(void) {
 ## Sections
 
 - [Working with files](files.md): reading, writing, `FileInfo`, moving and removing
-- [Working with directories](dirs.md): listing, creating, copying, walking and removing
+- [Working with directories](dirs.md): listing, creating, copying and removing
 - [Examples](examples.md): ready to use snippets
 - [Changelog](changelog.md)
 - [License](license.md)
